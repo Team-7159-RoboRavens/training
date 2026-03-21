@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/examples', 'src/exercises']
+        }
+    }
+}
+
+tasks.register('runExamples') {
+    doLast {
+        println "Examples are in src/examples/"
+        println "Run with: java -cp build/classes/java/main ClassName"
+    }
+}

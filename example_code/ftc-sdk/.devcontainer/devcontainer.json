@@ -1,0 +1,16 @@
+{
+  "name": "FTC SDK (Compile Check Only)",
+  "image": "mcr.microsoft.com/devcontainers/java:17",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-gradle",
+        "Dart-Code.flutter"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'FTC SDK environment ready. Use Android Studio for deployment. Run: ./gradlew build'",
+  "remoteUser": "vscode"
+}
