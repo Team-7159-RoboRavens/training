@@ -414,7 +414,130 @@ arr[-1];    // ERROR - negative index invalid
 
 ---
 
-## Slide 14: Practice Exercises
+## Slide 14: Switch Statement - Clean Decision Making
+
+A **switch statement** makes decisions when you have many possible values. Perfect for state machines!
+
+```java
+String robotState = "COLLECTING";
+
+switch (robotState) {
+    case "IDLE":
+        motor.setPower(0);
+        break;
+    case "DRIVING":
+        motor.setPower(0.8);
+        break;
+    case "COLLECTING":
+        arm.moveDown();
+        break;
+    case "SCORING":
+        arm.moveUp();
+        break;
+    default:
+        System.out.println("Unknown state!");
+}
+```
+
+### Switch vs If-Else:
+```java
+// If-Else approach (verbose)
+if (robotState.equals("IDLE")) { }
+else if (robotState.equals("DRIVING")) { }
+else if (robotState.equals("COLLECTING")) { }
+else { }
+
+// Switch approach (cleaner)
+switch (robotState) {
+    case "IDLE": ...
+    case "DRIVING": ...
+    case "COLLECTING": ...
+    default: ...
+}
+```
+
+### Key Points:
+- Use switch when comparing one variable to many values
+- **break;** exits the switch — forget it and code will "fall through"!
+- **default** case catches anything not matched (like `else`)
+- Works with enums, strings, integers, chars
+- Common in FTC for robot state machines
+
+---
+
+## Slide 15: ArrayList - Flexible Container
+
+An **ArrayList** is like an array, but it grows and shrinks dynamically. Use when you don't know the final size.
+
+```java
+// Import required
+import java.util.ArrayList;
+
+// Create ArrayList (stores Strings)
+ArrayList<String> gameElements = new ArrayList<>();
+
+// Add items
+gameElements.add("Block");
+gameElements.add("Specimen");
+gameElements.add("Block");
+
+// Get size and access items
+int count = gameElements.size();  // 3
+String first = gameElements.get(0);  // "Block"
+
+// Remove an item
+gameElements.remove(1);  // Removes "Specimen"
+
+// Loop through ArrayList
+for (String element : gameElements) {
+    System.out.println(element);
+}
+```
+
+### ArrayList vs Array:
+
+| Feature | Array | ArrayList |
+|---------|-------|-----------|
+| Size | Fixed (set at creation) | Dynamic (grows as needed) |
+| Syntax | `int[] arr` | `ArrayList<Integer> list` |
+| Add | Cannot (must replace) | `.add()` method |
+| Remove | Cannot (must shift manually) | `.remove()` method |
+| Performance | Faster | Slightly slower (flexible) |
+| When to use | Known size | Unknown size, frequent adds/removes |
+
+### Real FTC Examples:
+```java
+// Track scored game elements
+ArrayList<String> scoredItems = new ArrayList<>();
+scoredItems.add("Block");      // Score a block
+scoredItems.add("Specimen");   // Score a specimen
+int totalScored = scoredItems.size();
+
+// Store waypoints for autonomous
+ArrayList<Integer> waypoints = new ArrayList<>();
+waypoints.add(0);
+waypoints.add(500);
+waypoints.add(1000);
+
+for (int wp : waypoints) {
+    robot.moveToPosition(wp);
+}
+```
+
+### Common Methods:
+```java
+list.add(item);          // Add to end
+list.add(index, item);   // Add at position
+list.remove(index);      // Remove by index
+list.get(index);         // Get item at index
+list.size();             // Get number of items
+list.contains(item);     // Check if item exists
+list.clear();            // Remove all items
+```
+
+---
+
+## Slide 16: Practice Exercises
 
 ### Exercise 1: Variables and Types
 Create variables to store:
@@ -446,6 +569,20 @@ Create an array of 4 motor speeds
 - Print each value using a loop
 - Calculate the average
 
+### Exercise 6: Switch Statement
+Write a switch statement that:
+- Accepts a robot state (IDLE, DRIVING, COLLECTING, SCORING)
+- Prints different messages for each state
+- Has a default case for unknown states
+
+### Exercise 7: ArrayList
+Write code that:
+- Creates an ArrayList to store game element names
+- Adds 3 elements ("Block", "Specimen", "Ring")
+- Removes one element
+- Prints remaining items
+- Prints total count
+
 ---
 
 ## Week 1-2 Summary
@@ -459,6 +596,8 @@ You've learned the **fundamentals** of Java programming:
 ✅ **Methods** - How to organize reusable code
 ✅ **Arrays** - How to manage multiple values
 ✅ **Strings** - How to work with text
+✅ **Switch Statements** - Clean state machine decisions
+✅ **ArrayList** - Dynamic, flexible containers
 
 ### Ready for Next Week?
 Once you're comfortable with these concepts, you'll move to **FTC SDK Basics** where you'll apply this knowledge to actually control a robot!
