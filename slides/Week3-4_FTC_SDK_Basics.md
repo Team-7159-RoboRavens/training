@@ -10,6 +10,12 @@
 
 ---
 
+## FTC Hardware Components
+
+![FTC hardware components: game controller, driver station, servo, color sensor, control hub, switch, fuse, battery, and camera](FTC_robotics_programming_introduction.jpeg)
+
+---
+
 ## Slide 1: What is the FTC SDK?
 
 The **FTC Software Development Kit (SDK)** is the official framework for controlling FTC robots.
@@ -184,483 +190,321 @@ public void init() {
 
 ---
 
-## Slide 7: Controlling Motors
+## Slide 7: Hello World OpMode
 
-**Motors** are controlled by setting their power level.
+The simplest possible OpMode — no hardware, just telemetry.
 
-### Motor Power:
-- Range: **-1.0 to +1.0**
-  - `1.0` = full forward
-  - `0.5` = half power forward
-  - `0.0` = stopped
-  - `-0.5` = half power backward
-  - `-1.0` = full backward
-
-### Basic Motor Control:
+**Source:** `HelloWorld.java`
 ```java
-DcMotor motor = hardwareMap.get(DcMotor.class, "motor");
-
-motor.setPower(0.75);    // Run at 75% forward
-motor.setPower(-0.5);    // Run at 50% backward
-motor.setPower(0.0);     // Stop
-
-// Read current power
-double power = motor.getPower();
-```
-
-### Motor as Sensor (Encoder):
-```java
-motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-motor.resetEncoder();
-int ticks = motor.getCurrentPosition();  // How many ticks moved
-```
-
-### Common Patterns:
-```java
-// Simple drivetrain control
-leftMotor.setPower(gamepad1.left_stick_y);
-rightMotor.setPower(gamepad1.right_stick_y);
-
-// One motor to control speed
-int targetSpeed = 50;  // percent
-motor.setPower(targetSpeed / 100.0);
-```
-
----
-
-## Slide 8: Controlling Servos
-
-**Servos** move to a specific angle (typically 0° to 180°).
-
-### Servo Power:
-- Range: **0.0 to 1.0**
-  - `0.0` = One end (usually 0°)
-  - `0.5` = Middle (usually 90°)
-  - `1.0` = Other end (usually 180°)
-
-### Basic Servo Control:
-```java
-Servo claw = hardwareMap.get(Servo.class, "claw");
-
-claw.setPosition(0.0);     // Move to 0°
-claw.setPosition(0.5);     // Move to 90° (middle)
-claw.setPosition(1.0);     // Move to 180°
-
-// Read current position
-double pos = claw.getPosition();
-```
-
-### Common Patterns:
-```java
-// Toggle open/closed with button press
-if (gamepad1.a) {
-    claw.setPosition(0.0);  // Open
-}
-if (gamepad1.b) {
-    claw.setPosition(1.0);  // Close
-}
-
-// Smooth movement from 0 to 1
-for (double i = 0; i <= 1.0; i += 0.01) {
-    claw.setPosition(i);
-    sleep(10);  // Wait 10ms between steps
-}
-```
-
----
-
-## Slide 9: Reading Gamepad Input
-
-The **gamepad** is how drivers control the robot.
-
-### Analog Inputs (Joysticks):
-```java
-// Left joystick
-double leftY = gamepad1.left_stick_y;   // -1.0 to 1.0 (up/down)
-double leftX = gamepad1.left_stick_x;   // -1.0 to 1.0 (left/right)
-
-// Right joystick
-double rightY = gamepad1.right_stick_y;
-double rightX = gamepad1.right_stick_x;
-
-// Triggers
-double leftTrigger = gamepad1.left_trigger;    // 0.0 to 1.0
-double rightTrigger = gamepad1.right_trigger;
-```
-
-### Digital Inputs (Buttons):
-```java
-// Buttons are TRUE or FALSE
-boolean aButton = gamepad1.a;
-boolean bButton = gamepad1.b;
-boolean xButton = gamepad1.x;
-boolean yButton = gamepad1.y;
-
-// Bumpers
-boolean leftBumper = gamepad1.left_bumper;
-boolean rightBumper = gamepad1.right_bumper;
-
-// Directional pad
-boolean dpadUp = gamepad1.dpad_up;
-boolean dpadDown = gamepad1.dpad_down;
-```
-
-### Two Gamepads:
-```java
-// FTC supports 2 drivers
-gamepad1  // First controller
-gamepad2  // Second controller
-```
-
----
-
-## Slide 10: Simple TeleOp Example
-
-```java
-@TeleOp(name="Basic Drive")
-public class BasicDrive extends OpMode {
-    DcMotor leftMotor;
-    DcMotor rightMotor;
-    Servo claw;
+@TeleOp(name="Hello World")
+public class HelloWorld extends OpMode {
 
     @Override
     public void init() {
-        leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
-        rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
-        claw = hardwareMap.get(Servo.class, "claw");
+        telemetry.addData("Data", "oggly woogly");
     }
 
     @Override
     public void loop() {
-        // Drive with joysticks
-        leftMotor.setPower(gamepad1.left_stick_y);
-        rightMotor.setPower(gamepad1.right_stick_y);
-
-        // Control claw with buttons
-        if (gamepad1.a) {
-            claw.setPosition(0.0);  // Open
-        } else if (gamepad1.b) {
-            claw.setPosition(1.0);  // Close
-        }
-
-        // Send debug info to driver station
-        telemetry.addData("Left Speed", gamepad1.left_stick_y);
-        telemetry.addData("Right Speed", gamepad1.right_stick_y);
-        telemetry.update();
+        telemetry.addData("Data", "playing");
     }
 }
 ```
 
+### Key Points:
+- **Minimum structure**: annotation + class name + `init()` + `loop()`
+- `init()` runs **ONCE** → shows `"oggly woogly"` when INIT is pressed
+- `loop()` runs **REPEATEDLY** → shows `"playing"` while match is running
+- `telemetry.addData(label, value)` — sends text to the Driver Station screen
+- No hardware needed — telemetry works out of the box
+
 ---
 
-## Slide 11: Telemetry - Debug Information
+## Slide 8: Gamepad Test
 
-**Telemetry** sends text to the Driver Station for debugging.
+Read joystick and button values from the controller in real time.
 
-### Displaying Data:
+**Source:** `gamepadTest.java`
 ```java
-telemetry.addData("Motor Power", leftMotor.getPower());
-telemetry.addData("Position", claw.getPosition());
-telemetry.addData("Button A", gamepad1.a);
+@TeleOp
+public class gamepadTest extends OpMode {
 
-telemetry.update();  // Send to driver station
-```
+    @Override
+    public void init() {}
 
-### Multiple Lines:
-```java
-telemetry.addData("Left Motor", leftMotor.getPower());
-telemetry.addData("Right Motor", rightMotor.getPower());
-telemetry.addData("Claw", claw.getPosition());
-telemetry.addData("Status", "Running");
-telemetry.update();
-```
-
-### Clearing Previous Data:
-```java
-telemetry.clear();  // Remove old data
-telemetry.addData("New Data", value);
-telemetry.update();
-```
-
-### In the loop() method:
-```java
-@Override
-public void loop() {
-    // Your robot code here
-
-    // Always update telemetry at the end
-    telemetry.addData("Debug Info", someValue);
-    telemetry.update();
+    @Override
+    public void loop() {
+        telemetry.addData("x", gamepad1.left_stick_x);
+        telemetry.addData("y", gamepad1.left_stick_y);
+        telemetry.addData("x", gamepad1.x);  // ← bug: label "x" used twice!
+    }
 }
 ```
 
----
+### Key Points:
+- Joystick axes return `-1.0 to 1.0`; buttons return `true` or `false`
+- An empty `init()` is valid — not all OpModes need hardware setup
+- **Spot the bug**: the label `"x"` is used twice → the second entry overwrites the first on the Driver Station
+- **Fix**: use distinct labels, e.g. `"stick_x"` and `"button_x"`
 
-## Slide 12: Handling Motor Direction
-
-Motors might spin the wrong direction. Here's how to fix it:
-
-### Reversing a Motor:
-```java
-leftMotor.setDirection(DcMotor.Direction.FORWARD);   // Normal
-rightMotor.setDirection(DcMotor.Direction.REVERSE);  // Backwards
-```
-
-### Why Reverse?
-On a two-motor drivetrain, if you set both to forward power:
-- Left motor might spin forward
-- Right motor might spin backward (due to how it's mounted)
-
-Solution:
-```java
-@Override
-public void init() {
-    leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
-    rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
-
-    // Make both go the same direction
-    leftMotor.setDirection(DcMotor.Direction.FORWARD);
-    rightMotor.setDirection(DcMotor.Direction.REVERSE);
-}
-```
-
-### Test It:
-Set both motors to 0.5 power. They should both move forward. If not, adjust directions.
+### Gamepad Reference:
+| Input | Type | Range |
+|-------|------|-------|
+| `left_stick_x`, `left_stick_y` | analog | -1.0 to 1.0 |
+| `right_stick_x`, `right_stick_y` | analog | -1.0 to 1.0 |
+| `left_trigger`, `right_trigger` | analog | 0.0 to 1.0 |
+| `a`, `b`, `x`, `y` | digital | true / false |
+| `dpad_up`, `dpad_down`, etc. | digital | true / false |
 
 ---
 
-## Slide 13: Mechanical Components in Code
+## Slide 9: Servo Example
 
-### Summary of Common Hardware:
+Incremental position control using the dpad — with a mechanism class for clean abstraction.
 
-| Component | Class | Controls | Example |
-|-----------|-------|----------|---------|
-| Motor | `DcMotor` | Speed/direction | Drivetrain, intake, elevator |
-| Servo | `Servo` | Angle (0-180°) | Claw, arm pivot, gate |
-| Sensor | `DistanceSensor`, `ColorSensor` | Read values | Object detection |
-| Encoder | Part of `DcMotor` | Position/ticks | Autonomous movement |
-| IMU | `IMUEx` | Heading/rotation | Turning in autonomous |
-
-### Hardware Map Pattern:
+**Source:** `ServoEx.java`
 ```java
-// Motor with encoder
-DcMotor motor = hardwareMap.get(DcMotor.class, "motor");
-
-// Standard servo
-Servo servo = hardwareMap.get(Servo.class, "servo");
-
-// Distance sensor
-DistanceSensor distance = hardwareMap.get(DistanceSensor.class, "distance");
-
-// IMU (gyroscope)
-IMUEx imu = hardwareMap.get(IMUEx.class, "imu");
-```
-
----
-
-## Slide 14: Common OpMode Patterns
-
-### Pattern 1: Tank Drive
-```java
-// Two joysticks, one for each side
-leftMotor.setPower(gamepad1.left_stick_y);
-rightMotor.setPower(gamepad1.right_stick_y);
-```
-
-### Pattern 2: Arcade Drive
-```java
-// One joystick for forward/back, one for turning
-double forward = gamepad1.left_stick_y;
-double turn = gamepad1.right_stick_x;
-
-leftMotor.setPower(forward + turn);
-rightMotor.setPower(forward - turn);
-```
-
-### Pattern 3: Toggle Mechanism
-```java
-// Press button to toggle between two states
-boolean lastA = false;
-boolean clawOpen = false;
-
-if (gamepad1.a && !lastA) {
-    clawOpen = !clawOpen;  // Toggle
-}
-lastA = gamepad1.a;
-
-if (clawOpen) {
-    claw.setPosition(0.0);
-} else {
-    claw.setPosition(1.0);
-}
-```
-
-### Pattern 4: Analog Control
-```java
-// Use trigger to control servo smoothly
-double triggerValue = gamepad1.right_trigger;  // 0 to 1
-claw.setPosition(triggerValue);  // Servo position 0 to 1
-```
-
----
-
-## Slide 15: First Autonomous OpMode
-
-```java
-@Autonomous(name="Simple Auto")
-public class SimpleAuto extends OpMode {
-    DcMotor leftMotor;
-    DcMotor rightMotor;
+@TeleOp
+public class ServoEx extends OpMode {
+    Servo bench = new Servo();   // mechanism.Servo, not the FTC SDK class
+    double pos = 0;
 
     @Override
     public void init() {
-        leftMotor = hardwareMap.get(DcMotor.class, "leftMotor");
-        rightMotor = hardwareMap.get(DcMotor.class, "rightMotor");
+        bench.init(hardwareMap);
     }
 
     @Override
     public void loop() {
-        // Drive forward for 2 seconds
-        leftMotor.setPower(0.5);
-        rightMotor.setPower(0.5);
-
-        if (getRuntime() > 2.0) {
-            leftMotor.setPower(0.0);
-            rightMotor.setPower(0.0);
-            requestOpModeStop();  // Stop the program
-        }
-
-        telemetry.addData("Time", getRuntime());
-        telemetry.update();
+        if (gamepad1.dpad_up && pos < 1)   pos += 0.01;
+        if (gamepad1.dpad_down && pos > 0) pos -= 0.01;
+        bench.setServoPos(pos);
+        telemetry.addData("pos", pos);
     }
 }
 ```
 
----
-
-## Slide 16: Useful FTC Methods
-
-| Method | Purpose | Example |
-|--------|---------|---------|
-| `sleep(ms)` | Pause for milliseconds | `sleep(1000)` - wait 1 sec |
-| `getRuntime()` | Seconds since OpMode started | `if (getRuntime() > 5)` |
-| `opModeIsActive()` | Is the program still running | `while (opModeIsActive())` |
-| `requestOpModeStop()` | Stop the program | In autonomous when done |
-| `telemetry.update()` | Send data to Driver Station | Every loop cycle |
-
-### Note on sleep():
-- **Don't use it in loop()** - blocks everything
-- Use `getRuntime()` instead (non-blocking)
-
-### opModeIsActive() - Best Practice:
+**Mechanism class:** `mechanism/Servo.java`
 ```java
-@Override
-public void loop() {
-    if (!opModeIsActive()) return;  // Stop if program is stopping
+public class Servo {
+    private com.qualcomm.robotcore.hardware.Servo servoPos;
 
-    // Rest of your code
-    motor.setPower(0.5);
-    telemetry.update();
+    public void init(HardwareMap hwMap) {
+        servoPos = hwMap.get(com.qualcomm.robotcore.hardware.Servo.class, "servo_pos");
+    }
+    public void setServoPos(double angle) {
+        servoPos.setPosition(angle);
+    }
 }
 ```
 
+### Key Points:
+- **Mechanism pattern**: hardware initialization hidden in `bench.init(hardwareMap)` — hardware name is `"servo_pos"`
+- Bounds check `pos < 1` / `pos > 0` keeps the servo within valid range (0.0–1.0)
+- Each loop tick moves ±0.01 → ~100 ticks to travel full range (smooth motion)
+- `Servo` here is a **custom wrapper** — note the `com.qualcomm...Servo` qualifier inside the mechanism
+
 ---
 
-## Slide 17: Debugging Tips
+## Slide 10: Color Sensor Test
 
-### 1. Use Telemetry for Everything
+Detect red, yellow, or blue using normalized RGB values — with an enum for clean results.
+
+**Source:** `colorSensorTest.java`
 ```java
-telemetry.addData("Motor Power", motor.getPower());
-telemetry.addData("Servo Position", servo.getPosition());
-telemetry.addData("Gamepad A", gamepad1.a);
-telemetry.update();
-```
+@TeleOp
+public class colorSensorTest extends OpMode {
+    ColorDistance bench = new ColorDistance();
+    ColorDistance.DetectedColor color;
 
-### 2. Check Hardware Map Names
-```
-Configuration file says: "leftMotor"
-Code must say: "leftMotor"
+    @Override
+    public void init() {
+        bench.init(hardwareMap);
+    }
 
-If mismatched → Runtime error!
-```
-
-### 3. Motor Direction Check
-```
-Set power to 0.5
-→ Motor should move forward
-→ If backwards, add .setDirection(REVERSE)
-```
-
-### 4. Servo Range Check
-```
-Set to 0.0 → Should be at one extreme
-Set to 1.0 → Should be at other extreme
-```
-
-### 5. Gamepad Dead Zone
-```java
-// Joysticks have a dead zone (small movements are 0)
-// This prevents drift
-
-double y = gamepad1.left_stick_y;
-if (Math.abs(y) < 0.1) {
-    y = 0;  // Ignore small movements
+    @Override
+    public void loop() {
+        color = bench.getDetectedColor(telemetry);
+        telemetry.addData("color", color);
+    }
 }
 ```
 
+**Mechanism class key parts:** `mechanism/ColorDistance.java`
+```java
+public enum DetectedColor { RED, YELLOW, BLUE, UNKNOWN }
+
+public void init(HardwareMap hwMap) {
+    colorSensor = hwMap.get(NormalizedColorSensor.class, "sensor_color_distance");
+    colorSensor.setGain(10);
+}
+
+public DetectedColor getDetectedColor(Telemetry telemetry) {
+    NormalizedRGBA colors = colorSensor.getNormalizedColors();
+    float r = colors.red / colors.alpha;   // normalize to remove ambient light
+    float g = colors.green / colors.alpha;
+    float b = colors.blue / colors.alpha;
+    // RED:    r>0.8, g<0.5, b<0.5
+    // YELLOW: r>0.9, g>0.9, b<0.9
+    // BLUE:   r<0.4, g<0.8, b>0.8
+    ...
+}
+```
+
+### Key Points:
+- `DetectedColor` enum is cleaner than comparing raw floats in the OpMode
+- **Normalizing by alpha** (`r / alpha`) removes the effect of ambient lighting
+- `telemetry` is passed into `getDetectedColor()` so the mechanism can log raw R/G/B values for threshold tuning
+- Hardware name: `"sensor_color_distance"`
+
 ---
 
-## Slide 18: Practice Exercises
+## Slide 11: IMU Test
 
-### Exercise 1: Basic Motor Control
-Create a TeleOp that:
-- Controls left motor with left joystick Y
-- Controls right motor with right joystick Y
-- Prints motor powers to telemetry
+Read the robot's heading (rotation angle) from the built-in gyroscope.
 
-### Exercise 2: Servo Control
-Add a servo to your robot config, then:
-- Create OpMode that opens servo on 'A' button
-- Closes servo on 'B' button
-- Shows servo position on telemetry
+**Source:** `IMUTest.java`
+```java
+@TeleOp
+public class IMUTest extends OpMode {
+    TestBenchIMU bench = new TestBenchIMU();
 
-### Exercise 3: Mixed Control
-Create a TeleOp with:
-- Motor control via left joystick
-- Servo control via triggers (left trigger = open, right trigger = close)
-- Telemetry showing everything
+    @Override
+    public void init() {
+        bench.init(hardwareMap);
+    }
 
-### Exercise 4: Simple Autonomous
-Create an Auto OpMode that:
-- Runs both motors at 0.5 power
-- Stops after 3 seconds
-- Prints elapsed time to telemetry
+    @Override
+    public void loop() {
+        telemetry.addData("heading", bench.getHeading());
+    }
+}
+```
 
-### Exercise 5: Gamepad State Tracking
-Implement a toggle mechanism:
-- Press 'A' to toggle servo position
-- Press 'X' to toggle motor on/off
-- Shows current state on telemetry
+**Mechanism class:** `mechanism/TestBenchIMU.java`
+```java
+public class TestBenchIMU {
+    private IMU imu;
+
+    public void init(HardwareMap hwMap) {
+        imu = hwMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot orientation = new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.UP,
+                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD);
+        imu.initialize(new IMU.Parameters(orientation));
+    }
+
+    public double getHeading() {
+        return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+    }
+}
+```
+
+### Key Points:
+- **IMU** = Inertial Measurement Unit — the built-in gyroscope inside the REV Control Hub
+- `RevHubOrientationOnRobot` tells the SDK how the Control Hub is physically mounted on the robot (Logo UP, USB FORWARD for this test bench)
+- `getYaw(AngleUnit.DEGREES)` → heading in degrees: `0°` = forward, positive = left turn
+- Use cases: autonomous turning, driving straight, field-centric drive
+
+---
+
+## Slide 12: DC Motor Test
+
+Map gamepad input directly to motor speed — and read the power back to verify.
+
+**Source:** `dcMotorTest.java`
+```java
+@TeleOp
+public class dcMotorTest extends OpMode {
+    DcMotor bench = new DcMotor();   // mechanism.DcMotor wrapper
+
+    @Override
+    public void init() {
+        bench.init(hardwareMap);
+    }
+
+    @Override
+    public void loop() {
+        bench.setMotorSpeed(gamepad1.left_stick_y);
+        telemetry.addData("power", bench.motor.getPower());
+    }
+}
+```
+
+**Mechanism class:** `mechanism/DcMotor.java`
+```java
+public class DcMotor {
+    public com.qualcomm.robotcore.hardware.DcMotor motor;
+
+    public void init(HardwareMap hwMap) {
+        motor = hwMap.get(com.qualcomm.robotcore.hardware.DcMotor.class, "motor");
+        motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void setMotorSpeed(double speed) {
+        motor.setPower(speed);
+    }
+}
+```
+
+### Key Points:
+- Hardware name: `"motor"`; `RUN_USING_ENCODER` enables velocity-based control
+- Left stick Y (`-1.0 to 1.0`) maps directly to motor power
+- **Note**: pushing the stick forward often gives a **negative** Y value — you may need to negate: `bench.setMotorSpeed(-gamepad1.left_stick_y)`
+- `bench.motor.getPower()` reads power back for verification — the `motor` field is `public` in the mechanism class, allowing direct SDK access when needed
+
+---
+
+## Slide 13: Practice Exercises
+
+### Exercise 1: Hello World
+Modify `HelloWorld.java`:
+- Change the `init()` message to display your name
+- Add an `int counter` field; increment it each loop tick and show it with `telemetry.addData("loop#", counter)`
+
+### Exercise 2: Gamepad Test
+Fix and extend `gamepadTest.java`:
+- Fix the duplicate `"x"` label bug with distinct label names
+- Add right stick X and Y to the telemetry output
+
+### Exercise 3: Servo Example
+Modify `ServoEx.java`:
+- Change the step size from `0.01` to `0.05` (faster movement)
+- Add: pressing the `x` button snaps `pos` directly to `0.5` (center position)
+
+### Exercise 4: Color Sensor Test
+Extend `colorSensorTest.java`:
+- After getting `color`, add an `if` statement that calls `telemetry.addLine("RED DETECTED!")` when `color == DetectedColor.RED`
+
+### Exercise 5: IMU Test
+Extend `IMUTest.java`:
+- Add an `if` statement that calls `telemetry.addLine("FACING FORWARD")` when the heading is within ±10° of zero
+
+### Exercise 6: DC Motor Test
+Extend `dcMotorTest.java`:
+- Add a second `DcMotor` mechanism instance (hardware name `"motor2"`)
+- Call `bench2.init(hardwareMap)` in `init()`
+- Control it with `gamepad1.right_stick_y` in `loop()`
 
 ---
 
 ## Week 3-4 Summary
 
-You've learned how to use the **FTC SDK**:
+You've learned how to use the **FTC SDK** with real robot code:
 
-✅ **OpMode Structure** - How programs run on robots
-✅ **Hardware Mapping** - Connecting code to robot parts
-✅ **Motor Control** - Setting power levels
-✅ **Servo Control** - Moving to specific angles
-✅ **Gamepad Input** - Reading driver commands
-✅ **Telemetry** - Debugging and showing information
-✅ **Writing Real OpModes** - Your first TeleOp and Autonomous
+✅ **Hello World OpMode** - Minimum structure: annotation, `init()`, `loop()`, telemetry
+✅ **Gamepad Input** - Reading joystick axes and button states
+✅ **Servo Control** - Incremental dpad control with bounds checking
+✅ **Color Sensor** - Normalized RGB, `DetectedColor` enum, threshold tuning
+✅ **IMU / Gyroscope** - Reading heading, hub orientation setup
+✅ **DC Motor Control** - Encoder mode, gamepad → power mapping
+✅ **Mechanism Pattern** - Wrapping hardware in reusable classes
 
 ### Next Steps:
-- Write a complete TeleOp for your robot
-- Test each component individually
-- Combine components into full control system
-- Start working on autonomous routines
+- Run each test OpMode on the real test bench
+- Tune color thresholds using the telemetry R/G/B values
+- Combine motors + sensors into a full TeleOp
+- Start using IMU heading for autonomous straight-line driving
 
 ---
 
