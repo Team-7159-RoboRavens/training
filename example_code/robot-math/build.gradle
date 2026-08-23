@@ -2,10 +2,12 @@ plugins {
     id 'java'
 }
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(17)
-    }
+// Match the FTC SDK: the robot (and OnBotJava) only runs Java 1.8, so compile at
+// that level even though the JDK running Gradle is newer.
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+    // Silence "source value 8 is obsolete" from JDK 21+ (harmless; FTC hits it too).
+    options.compilerArgs << '-Xlint:-options'
 }
 
 repositories {

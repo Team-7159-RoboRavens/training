@@ -46,7 +46,7 @@ training/
 
 ### Option 1: GitHub Codespaces (Recommended)
 1. Click the "Code" button above → "Codespaces" → "Create codespace"
-2. Wait for the environment to load (Java 17, VS Code extensions ready)
+2. Wait for the environment to load (JDK 17, VS Code extensions ready — your code still compiles at Java 8, see below)
 3. Start with `example_code/java-foundations/` for pure Java practice
 
 ### Option 2: Local Development
@@ -112,9 +112,28 @@ training/
 ## 🛠️ Development Environment
 
 ### Java Foundations (Codespaces Ready)
-- **Java 17** (pre-installed in Codespaces)
+- **JDK 17 or newer** to run Gradle (pre-installed in Codespaces)
 - **VS Code** with Java extensions
 - **Gradle** for building and running
+
+### Why does everything compile at Java 8?
+
+The JDK that *runs* the build can be any modern version, but the code itself is
+compiled at **Java 8 (1.8)** — the same level the FTC SDK uses:
+
+```groovy
+// example_code/*/build.gradle
+tasks.withType(JavaCompile).configureEach {
+    options.release = 8
+}
+```
+
+The robot can't run anything newer. The FTC SDK pins `sourceCompatibility` and
+`targetCompatibility` to `VERSION_1_8`, and OnBotJava only supports 1.8. So newer
+language features and APIs — `var`, `List.of()`, records, text blocks, switch
+expressions — will **fail to compile here on purpose**. That's deliberate: better to
+find out at your desk than on the field. Anything that compiles in these modules will
+run on your robot.
 
 ### FTC SDK (Requires Android Studio)
 - **Android Studio** (2021.2+ recommended)
