@@ -1,0 +1,7 @@
+rootProject.name = 'coach-sun-training'
+
+include 'java-foundations'
+include 'robot-math'
+
+project(':java-foundations').projectDir = file('example_code/java-foundations')
+project(':robot-math').projectDir       = file('example_code/robot-math')
